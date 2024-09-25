@@ -6,7 +6,7 @@ import os
 import glob
 import json
 
-file = "/home/rishabh/Projects/py/shows.json"
+file = "/home/rishabh/Projects/bingecli/shows.json"
 
 
 # def createFile():
@@ -89,12 +89,13 @@ def open_file(filename):
         os.startfile(filename)
     else:
         opener = "open" if sys.platform == "darwin" else "xdg-open"
-        subprocess.call([opener, filename])
+        process = subprocess.Popen(['vlc','--play-and-exit', filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        process.wait()
 
 
 def getCurrentFile(selectedShow, next=False):
     if not next:
-        selectedShow['dir'] = re.sub('([\[\]])', '[\\1]', selectedShow['dir'])
+        selectedShow['dir'] = re.sub(r'([\[\]])', r'[\1]', selectedShow['dir'])
     list_of_files = []
     list_of_files.extend(
         filter(os.path.isfile, glob.glob(selectedShow['dir'] + '*.mkv')))
@@ -103,8 +104,14 @@ def getCurrentFile(selectedShow, next=False):
     list_of_files = sorted(list_of_files)
     return list_of_files[selectedShow['epi']-1]
 
-
-open_file(getCurrentFile(selectedShow))
+def incEpi():
+    incEpiOrNa = input("Do u want to increase the epi no (y,n): ")
+    if incEpiOrNa == "y":
+        editJson(file)
+        print(selectedShow['name'], ":", selectedShow['epi'] + 1)
+        playNext()
+    else:
+        print("Bye")
 
 
 def playNext():
@@ -117,14 +124,5 @@ def playNext():
         print("Bye")
 
 
-def incEpi():
-    incEpiOrNa = input("Do u want to increase the epi no (y,n): ")
-    if incEpiOrNa == "y":
-        editJson(file)
-        print(selectedShow['name'], ":", selectedShow['epi'] + 1)
-        playNext()
-    else:
-        print("Bye")
-
-
+open_file(getCurrentFile(selectedShow))
 incEpi()
